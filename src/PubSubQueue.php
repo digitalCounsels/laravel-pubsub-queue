@@ -135,7 +135,7 @@ class PubSubQueue extends Queue implements QueueContract
             return;
         }
 
-        $subscription = $topic->subscription($this->getSubscriberName());
+        $subscription = $topic->subscription($this->getSubscriberName($topic));
         $messages = $subscription->pull([
             'returnImmediately' => true,
             'maxMessages' => 1,
@@ -194,7 +194,9 @@ class PubSubQueue extends Queue implements QueueContract
      */
     public function acknowledge(Message $message, $queue = null)
     {
-        $subscription = $this->getTopic($this->getQueue($queue))->subscription($this->getSubscriberName());
+        $topic = $this->getTopic($this->getQueue($queue));
+
+        $subscription = $topic->subscription($this->getSubscriberName($topic));
         $subscription->acknowledge($message);
     }
 
@@ -290,10 +292,10 @@ class PubSubQueue extends Queue implements QueueContract
      */
     public function subscribeToTopic(Topic $topic)
     {
-        $subscription = $topic->subscription($this->getSubscriberName());
+        $subscription = $topic->subscription($this->getSubscriberName($topic));
 
         if (! $subscription->exists()) {
-            $subscription = $topic->subscribe($this->getSubscriberName());
+            $subscription = $topic->subscribe($this->getSubscriberName($topic));
         }
 
         return $subscription;
@@ -306,9 +308,9 @@ class PubSubQueue extends Queue implements QueueContract
      *
      * @return string
      */
-    public function getSubscriberName()
+    public function getSubscriberName(Topic $topic)
     {
-        return $this->subscriber;
+        return 'pull-' . str_replace('_', '-', $topic->name());
     }
 
     /**
