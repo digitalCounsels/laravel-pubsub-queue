@@ -310,7 +310,10 @@ class PubSubQueue extends Queue implements QueueContract
      */
     public function getSubscriberName(Topic $topic)
     {
-        return 'pull-' . str_replace('_', '-', $topic->name());
+        $parts = explode('/', $topic->name());
+        $name = end($parts);
+
+        return 'pull-' . str_replace('_', '-', $name);
     }
 
     /**
